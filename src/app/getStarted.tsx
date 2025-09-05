@@ -20,10 +20,16 @@ export default function NewUser() {
             />
           </View>
           <View className="mt-20">
-            <AppText className="font-poppins font-bold text-3xl pl-5 pr-20">
+            <AppText
+              color="light"
+              className="font-poppins font-bold text-3xl pl-5 pr-20"
+            >
               The best app for making your tapping efficient.
             </AppText>
-            <AppText className="font-poppins text-xl pl-5 pr-20 font-extrabold tracking-widest">
+            <AppText
+              color="light"
+              className="font-poppins text-xl pl-5 pr-20 font-extrabold tracking-widest"
+            >
               --------------------------
             </AppText>
           </View>

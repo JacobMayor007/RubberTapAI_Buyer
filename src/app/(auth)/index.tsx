@@ -1,5 +1,6 @@
 import { AppText } from "@/src/components/AppText";
 import { Button } from "@/src/components/Button";
+import ForgotPassword from "@/src/components/ForgotPassword";
 import Loading from "@/src/components/LoadingComponent";
 import Logo from "@/src/components/Logo";
 import { useAuth } from "@/src/contexts/AuthContext";
@@ -16,6 +17,7 @@ import {
   Pressable,
   ScrollView,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -26,6 +28,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [forgotModal, setForgotModal] = useState(false);
   const [userInfo, setUserInfo] = useState({
     email: "",
     password: "",
@@ -146,11 +149,11 @@ export default function Login() {
                     </Pressable>
                   </View>
 
-                  <Pressable>
+                  <TouchableOpacity onPress={() => setForgotModal(true)}>
                     <AppText className="font-poppins font-bold text-[#F3E0C1] text-right">
                       Forgot Password?
                     </AppText>
-                  </Pressable>
+                  </TouchableOpacity>
 
                   <Button
                     title="Login"
@@ -173,7 +176,9 @@ export default function Login() {
               </View>
             </View>
           </ScrollView>
-          <Modal visible={false} animationType="slide"></Modal>
+          <Modal visible={forgotModal} animationType="slide">
+            <ForgotPassword setForgotModal={setForgotModal} />
+          </Modal>
         </KeyboardAvoidingView>
       </ImageBackground>
     </SafeAreaView>
