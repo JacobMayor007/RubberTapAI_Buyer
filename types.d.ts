@@ -10,37 +10,9 @@ interface Profile {
   notifSettings: string;
   themeSettings: string;
   subscription: Boolean;
+  username: string;
   imageURL: string;
   API_KEY: string;
-}
-
-interface Plot {
-  $id: string;
-  $createdAt: Dayjs;
-  name: string;
-  image_plot: string;
-  user_id: string;
-  status: string;
-}
-
-interface Tree_Record {
-  $id: string;
-  $createdAt: Dayjs;
-  plot_id: string;
-  user_id: string;
-  image_url: string;
-  status: string;
-}
-
-interface Leaves {
-  $id: string;
-  $createdAt: Dayjs;
-  plot_id: string;
-  tree_id: string;
-  user_id: string;
-  image_url: string;
-  status: string;
-  confidence: string;
 }
 
 interface MessageHistory {
@@ -71,6 +43,7 @@ interface Product {
   user_id: string;
   user_username: string;
   user_email: string;
+  user_fullName: string;
   productURL: string;
   description: string;
   price: number;

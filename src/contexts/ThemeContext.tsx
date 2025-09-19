@@ -17,11 +17,11 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState("light");
-  const systemTheme = useColorScheme(); 
+  const systemTheme = useColorScheme();
 
   useEffect(() => {
     const loadTheme = async () => {
-      const storedTheme = await AsyncStorage.getItem("theme"); 
+      const storedTheme = await AsyncStorage.getItem("theme");
       const storedThemeType = await AsyncStorage.getItem("appearance");
 
       if (storedTheme === "System") {

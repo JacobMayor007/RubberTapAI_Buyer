@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { ID } from "react-native-appwrite";
+import { globalFunction } from "../global/fetchWithTimeout";
 import { account } from "../lib/appwrite";
 
 type User = {
@@ -21,21 +22,27 @@ type Profile = {
   $createdAt?: string;
   email: string;
   username: string;
+  fullName: string;
+  fName: string;
+  lName: string;
   notifSettings: string;
   themeSettings: string;
   subscription: Boolean;
   imageURL: string;
+  API_KEY: string;
 } | null;
 
 type AuthContextType = {
   user: User;
   loading: boolean;
+  profile: Profile | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   isReady: boolean;
   setIsReady: (ready: boolean) => void;
   setUser: (user: User | null) => void;
+  setProfile: (user: Profile | null) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,17 +50,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User>(null);
   const [isReady, setIsReady] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile>(null);
   const router = useRouter();
 
   const getUser = async () => {
     try {
       const userData = await account.get();
       setUser(userData);
+      await getProfile(userData.$id);
     } catch {
       setUser(null);
     } finally {
       setLoading(false);
       setIsReady(true);
+    }
+  };
+
+  const getProfile = async (userId: string) => {
+    try {
+      const response = await globalFunction.fetchWithTimeout(
+        `${process.env.EXPO_PUBLIC_BASE_URL}/user/${userId}`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        },
+        20000
+      );
+
+      const profileJson = await response.json();
+
+      setProfile(profileJson);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -94,6 +124,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         register,
         setIsReady,
         setUser,
+        profile,
+        setProfile,
       }}
     >
       {children}

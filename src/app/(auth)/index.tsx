@@ -4,6 +4,7 @@ import ForgotPassword from "@/src/components/ForgotPassword";
 import Loading from "@/src/components/LoadingComponent";
 import Logo from "@/src/components/Logo";
 import { useAuth } from "@/src/contexts/AuthContext";
+import { globalFunction } from "@/src/global/fetchWithTimeout";
 import Feather from "@expo/vector-icons/Feather";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
@@ -50,9 +51,37 @@ export default function Login() {
     }
 
     try {
-      await auth.login(userInfo.email, userInfo.password);
+      setLoading(true);
+
+      const isBuyer = await globalFunction.fetchWithTimeout(
+        `${process.env.EXPO_PUBLIC_BASE_URL}/role`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            Accept: "application/json",
+            "x-api-key": `${process.env.EXPO_PUBLIC_RUBBERTAPAI_API_KEY}`,
+          },
+          body: JSON.stringify({ email: userInfo.email }),
+        },
+        20000
+      );
+
+      const response = await isBuyer.json();
+
+      console.log(response);
+
+      if (response.role !== "buyer") {
+        Alert.alert(response.title, response.message);
+        return;
+      }
+
+      if (response.role === "buyer") {
+        await auth.login(userInfo.email, userInfo.password);
+        return;
+      }
     } catch (error) {
-      console.error("Error registering user:", error);
+      console.error("Error logging user:", error);
 
       Alert.alert(
         "Invalid credentials",
