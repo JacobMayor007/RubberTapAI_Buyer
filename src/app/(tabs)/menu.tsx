@@ -149,9 +149,9 @@ export default function Menu() {
           />
         </View>
         <View
-          className={`${theme === "dark" ? `bg-[rgb(83,62,53,0.5)]` : `bg-[rgb(83,62,53,0.1)]`} mx-6 mt-4 px-4 rounded-lg outline-dashed`}
+          className={`${theme === "dark" ? `bg-[rgb(83,62,53,0.5)]` : `bg-[rgb(83,62,53,0.1)]`} border mx-6 mt-4 px-4 rounded-lg outline-dashed`}
         >
-          <Pressable
+          <TouchableOpacity
             onPress={() => {
               setModalShown("logout");
               setVisibleModal(true);
@@ -165,7 +165,7 @@ export default function Menu() {
               Logout
             </AppText>
             <Ionicons name="exit-outline" size={32} color={"red"} />
-          </Pressable>
+          </TouchableOpacity>
         </View>
       </ScrollView>
       <View

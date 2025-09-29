@@ -11,7 +11,7 @@ export default function Logout({ setVisibleModal }: AppearanceProps) {
   const { logout } = useAuth();
 
   return (
-    <View className={`flex-1 px-6 justify-end bg-black/40`}>
+    <View className={`flex-1 px-6 justify-end bg-black/90`}>
       <View className="h-[30%] items-center justify-center gap-5">
         <Pressable
           onPress={logout}
