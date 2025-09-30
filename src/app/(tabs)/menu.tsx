@@ -12,14 +12,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useState } from "react";
-import {
-  Image,
-  Modal,
-  Pressable,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, Modal, Pressable, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Menu() {
@@ -30,7 +23,7 @@ export default function Menu() {
 
   return (
     <SafeAreaView className="flex-1">
-      <ScrollView
+      <View
         className={`${theme === "dark" ? `bg-slate-900/50` : `bg-[#FFECCC]`} flex-1 relative`}
       >
         <View className="absolute z-10">
@@ -131,7 +124,7 @@ export default function Menu() {
             }}
           />
         </Pressable>
-        <View className="flex-row justify-between items-center mx-6 mt-4 px-4 rounded-lg outline-dashed z-30">
+        <View className="flex-row mb-4 justify-between items-center mx-6 mt-4 px-4 rounded-lg outline-dashed z-30">
           <AppText
             color={theme === "dark" ? "light" : "dark"}
             className="font-poppins font-bold text-lg"
@@ -148,26 +141,24 @@ export default function Menu() {
             }}
           />
         </View>
-        <View
-          className={`${theme === "dark" ? `bg-[rgb(83,62,53,0.5)]` : `bg-[rgb(83,62,53,0.1)]`} border mx-6 mt-4 px-4 rounded-lg outline-dashed`}
+
+        <TouchableOpacity
+          style={{ zIndex: 999 }}
+          className="flex-row justify-between items-center  mx-8 p-2"
+          onPress={() => {
+            setModalShown("logout");
+            setVisibleModal(true);
+          }}
         >
-          <TouchableOpacity
-            onPress={() => {
-              setModalShown("logout");
-              setVisibleModal(true);
-            }}
-            className="flex-row justify-between items-center"
+          <AppText
+            color={"dark"}
+            className="font-poppins font-bold text-lg text-red-600"
           >
-            <AppText
-              color={"dark"}
-              className="font-poppins font-bold text-lg text-red-600"
-            >
-              Logout
-            </AppText>
-            <Ionicons name="exit-outline" size={32} color={"red"} />
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+            Logout
+          </AppText>
+          <Ionicons name="exit-outline" size={32} color={"red"} />
+        </TouchableOpacity>
+      </View>
       <View
         className={`${theme === "dark" ? `bg-slate-900/50` : `bg-[#FFECCC]`}`}
       >

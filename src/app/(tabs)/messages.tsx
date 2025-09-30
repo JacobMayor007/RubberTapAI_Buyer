@@ -1,9 +1,12 @@
 import { AppText } from "@/src/components/AppText";
+import ConfirmCancelModal from "@/src/components/ConfirmOrCancelModal";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useMessage } from "@/src/contexts/MessageContext";
 import { useTheme } from "@/src/contexts/ThemeContext";
-import { client, storage } from "@/src/lib/appwrite";
+import { globalFunction } from "@/src/global/fetchWithTimeout";
+import { storage } from "@/src/lib/appwrite";
 import { MessageHistory, Profile } from "@/types";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -19,6 +22,7 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  Modal,
   Pressable,
   ScrollView,
   TextInput,
@@ -41,6 +45,9 @@ export default function Messages() {
   const [images, setImages] = useState("");
   const [loading, setLoading] = useState(true);
   const { theme } = useTheme();
+  const [rateModal, setRateModal] = useState(false);
+  const [rateUser, setRateUser] = useState(0);
+  const [feedback, setFeedback] = useState("");
   const [showDate, setShowDate] = useState<Number | null>(null);
 
   const [messages, setMessages] = useState<MessageHistory[]>([]);
@@ -97,17 +104,6 @@ export default function Messages() {
     if (!user?.$id || !userMessage?.user?.$id) return;
 
     getMessages();
-
-    const channel = `databases.${process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID}.collections.${process.env.EXPO_PUBLIC_APPWRITE_MESS_COLLECTION_ID}.documents`;
-    const unsubscribe = client.subscribe(channel, (response) => {
-      if (response.events.includes("databases.*.collections.*.documents.*")) {
-        getMessages();
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
   }, [messages]);
 
   const getMessages = async () => {
@@ -177,7 +173,7 @@ export default function Messages() {
       }
 
       const data = {
-        sender_id: user?.$id,
+        userId: user?.$id,
         receiver_id: userMessage?.user?.$id,
         lastMessage: newMessage,
         senderProfile: profile?.imageURL,
@@ -185,6 +181,7 @@ export default function Messages() {
         senderName: user?.name,
         receiverName: userMessage?.user?.username,
         fileUrl: fileUrl ? fileUrl : ``,
+        API_KEY: profile?.API_KEY,
       };
 
       console.log("Data to be sent: ", JSON.stringify(data, null, 2));
@@ -212,6 +209,49 @@ export default function Messages() {
       }, 10000);
     }
   }, [showDate]);
+
+  const rateAndFeedbackUser = async () => {
+    try {
+      setLoading(true);
+
+      if (!rateUser) {
+        return Alert.alert("Rate is missing", "Please rate the user.");
+      }
+
+      const result = await globalFunction.fetchWithTimeout(
+        `${process.env.EXPO_PUBLIC_BASE_URL}/rate`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            userId: user?.$id,
+            receivedId: userMessage?.user?.$id,
+            API_KEY: profile?.API_KEY,
+            rate: rateUser,
+            feedback: feedback,
+          }),
+        },
+        20000
+      );
+
+      const response = await result.json();
+
+      console.log(response);
+      setFeedback("");
+      setRateUser(0);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 300);
+    }
+  };
+
+  console.log(profile?.$id, profile?.email);
 
   return (
     <SafeAreaView className="bg-[rgb(63,31,17,.05)] flex-1 ">
@@ -280,58 +320,76 @@ export default function Messages() {
             >
               {messages?.map((msg, index) => {
                 return (
-                  <View
-                    key={index}
-                    className={`${msg?.sender_id === user?.$id ? `flex-row-reverse` : `flex-row`} items-center gap-2`}
-                  >
-                    <Image
-                      source={{
-                        uri:
-                          msg?.sender_id === user?.$id
-                            ? profile?.imageURL
-                            : userMessage?.user?.imageURL,
-                      }}
-                      className="h-8 w-8 rounded-full mt-4"
-                    />
-                    <TouchableOpacity
-                      onPress={() =>
-                        setShowDate((prev) => (prev === index ? null : index))
-                      }
-                      className={`min-w-48 max-w-72 p-3 rounded-md mb-2 w-fit  ${
-                        msg.sender_id === user?.$id
-                          ? "bg-blue-500 text-white ml-auto text-right font-hind font-medium text-base "
-                          : "bg-gray-300 text-black mr-auto text-left font-hind font-medium text-base"
-                      }`}
-                      style={
-                        msg.$id === user?.$id
-                          ? {
-                              borderTopLeftRadius: 24,
-                              borderBottomRightRadius: 24,
-                            }
-                          : {
-                              borderTopRightRadius: 24,
-                              borderBottomLeftRadius: 24,
-                            }
-                      }
+                  <View key={index}>
+                    <View
+                      className={`${msg?.sender_id === user?.$id ? `flex-row-reverse` : `flex-row`} items-center gap-2`}
                     >
-                      {msg?.imageUrl && (
-                        <Image
-                          className="h-12 w-12"
-                          source={{ uri: msg?.imageUrl }}
-                        />
-                      )}
-                      <AppText
-                        color={msg?.sender_id === user?.$id ? "light" : "dark"}
-                        className=" font-poppins font-semibold"
+                      <Image
+                        source={{
+                          uri:
+                            msg?.sender_id === user?.$id
+                              ? profile?.imageURL
+                              : userMessage?.user?.imageURL,
+                        }}
+                        className="h-8 w-8 rounded-full mt-4"
+                      />
+                      <TouchableOpacity
+                        onPress={() =>
+                          setShowDate((prev) => (prev === index ? null : index))
+                        }
+                        className={`min-w-48 max-w-72 p-3 rounded-md mb-2 w-fit  ${
+                          msg.sender_id === user?.$id
+                            ? "bg-blue-500 text-white ml-auto text-right font-hind font-medium text-base "
+                            : "bg-gray-300 text-black mr-auto text-left font-hind font-medium text-base"
+                        }`}
+                        style={
+                          msg.$id === user?.$id
+                            ? {
+                                borderTopLeftRadius: 24,
+                                borderBottomRightRadius: 24,
+                              }
+                            : {
+                                borderTopRightRadius: 24,
+                                borderBottomLeftRadius: 24,
+                              }
+                        }
                       >
-                        {msg?.content}
-                      </AppText>
-                      {index === showDate && (
-                        <AppText className="text-right text-xs mt-2">
-                          {msg.$createdAt.utc().local().format("hh:mm A")}
+                        {msg?.imageUrl && (
+                          <Image
+                            className="h-12 w-12"
+                            source={{ uri: msg?.imageUrl }}
+                          />
+                        )}
+                        <AppText
+                          color={
+                            msg?.sender_id === user?.$id ? "light" : "dark"
+                          }
+                          className=" font-poppins font-semibold"
+                        >
+                          {msg?.content}
                         </AppText>
-                      )}
-                    </TouchableOpacity>
+                        {index === showDate && (
+                          <AppText className="text-right text-xs mt-2">
+                            {msg.$createdAt.utc().local().format("hh:mm A")}
+                          </AppText>
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                    {index === 5 && (
+                      <View className="items-center my-4">
+                        <TouchableOpacity
+                          className="bg-yellow-400 px-6 py-3 rounded-full shadow-md"
+                          onPress={() => setRateModal(true)}
+                        >
+                          <AppText
+                            color="dark"
+                            className="font-poppins font-bold"
+                          >
+                            ⭐ Rate {userMessage.user?.username}
+                          </AppText>
+                        </TouchableOpacity>
+                      </View>
+                    )}
                   </View>
                 );
               })}
@@ -377,6 +435,70 @@ export default function Messages() {
           )}
         </View>
       </KeyboardAvoidingView>
+      <Modal
+        transparent
+        visible={rateModal}
+        onRequestClose={() => setRateModal(false)}
+      >
+        <ConfirmCancelModal
+          heightSize={96}
+          padding={10}
+          blurIntensity={70}
+          borderRounded={12}
+          onClose={() => setRateModal(false)}
+          onCancel={() => setRateModal(false)}
+          onOk={() => {
+            rateAndFeedbackUser();
+            setRateModal(false);
+          }}
+        >
+          <AppText color="dark" className="font-bold font-poppins text-lg m-2">
+            Rate user: {userMessage?.user?.fullName}
+          </AppText>
+          <View className="flex-col m-auto pb-10 gap-4 ">
+            <View className=" flex-row items-center gap-4 pl-5">
+              <AntDesign
+                name="star"
+                onPress={() => setRateUser(1)}
+                size={32}
+                color={rateUser > 0 ? "#fadb14" : ""}
+              />
+              <AntDesign
+                name="star"
+                onPress={() => setRateUser(2)}
+                size={32}
+                color={rateUser > 1 ? "#fadb14" : ""}
+              />
+              <AntDesign
+                name="star"
+                onPress={() => setRateUser(3)}
+                size={32}
+                color={rateUser > 2 ? "#fadb14" : ""}
+              />
+              <AntDesign
+                name="star"
+                onPress={() => setRateUser(4)}
+                size={32}
+                color={rateUser > 3 ? "#fadb14" : ""}
+              />
+              <AntDesign
+                name="star"
+                onPress={() => setRateUser(5)}
+                size={32}
+                color={rateUser > 4 ? "#fadb14" : ""}
+              />
+            </View>
+            <TextInput
+              multiline
+              placeholder="(Optional)"
+              textAlignVertical="top"
+              value={feedback}
+              onChangeText={setFeedback}
+              className="border-[1px] border-gray-500 h-28 w-72 rounded-lg"
+            />
+          </View>
+        </ConfirmCancelModal>
+      </Modal>
     </SafeAreaView>
   );
 }

@@ -338,7 +338,7 @@ export default function ChatBox() {
                           color={"dark"}
                           className="font-poppins font-medium"
                         >
-                          Username: {data.fullName}
+                          Username: {data.username}
                         </AppText>
                       </View>
                     </TouchableOpacity>
