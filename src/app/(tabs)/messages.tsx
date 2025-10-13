@@ -251,10 +251,10 @@ export default function Messages() {
     }
   };
 
-  console.log(profile?.$id, profile?.email);
-
   return (
-    <SafeAreaView className="bg-[rgb(63,31,17,.05)] flex-1 ">
+    <SafeAreaView
+      className={`${theme === "dark" ? `bg-[rgb(63,31,17,.05)]` : `bg-[#FFECCC]`} flex-1`}
+    >
       <KeyboardAvoidingView
         style={{
           flex: 1,

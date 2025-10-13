@@ -76,6 +76,11 @@ export default function Login() {
         return;
       }
 
+      if (response.title === "Account Disabled") {
+        Alert.alert(response.title, response.message);
+        return;
+      }
+
       if (response.role === "buyer") {
         await auth.login(userInfo.email, userInfo.password);
         return;
