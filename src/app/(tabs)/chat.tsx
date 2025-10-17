@@ -1,4 +1,5 @@
 import { AppText } from "@/src/components/AppText";
+import BottomNav from "@/src/components/BottomNav";
 import Logo from "@/src/components/Logo";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useMessage } from "@/src/contexts/MessageContext";
@@ -138,6 +139,8 @@ export default function ChatBox() {
 
   const handleMessageUser = async (chatMate_id: string) => {
     try {
+      console.log(chatMate_id);
+
       if (!chatMate_id) {
         messageUser?.setUser(profile);
       } else {
@@ -151,10 +154,9 @@ export default function ChatBox() {
           }
         );
 
-        const data = await response.json();
+        const data: Profile = await response.json();
 
         messageUser?.setUser(data);
-        console.log("Chat Mate Not Self: ", messageUser?.user);
       }
     } catch (error) {
       console.error(error);
@@ -193,14 +195,19 @@ export default function ChatBox() {
         {loading ? (
           <ActivityIndicator animating size={"large"} />
         ) : (
-          <ScrollView className="flex-1 py-2 gap-2">
+          <ScrollView className="flex-1 pb-36 gap-2">
             {chatHistory.map((chat, chatIndex) => {
               const other = getOtherParticipant(chat);
 
               return (
+                // <TouchableOpacity
+                //   onPress={async () => await handleMessageUser(other.id)}
+                //   key={chat.$id || chatIndex}
+                //   className="flex-row py-2 mt-2 items-center"
+                // >
                 <Link
                   onPress={async () => await handleMessageUser(other.id)}
-                  href={"/(tabs)/messages"}
+                  href={{ pathname: "/(tabs)/messages" }}
                   key={chat.$id || chatIndex}
                   className="flex-row py-2 mt-2 items-center"
                 >
@@ -247,11 +254,13 @@ export default function ChatBox() {
                       </AppText>
                     </View>
                   </View>
+                  {/* </TouchableOpacity> */}
                 </Link>
               );
             })}
           </ScrollView>
         )}
+        {!loading && <BottomNav title="chat" />}
       </View>
       <Modal
         visible={visibleModal}

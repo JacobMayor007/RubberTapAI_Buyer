@@ -1,21 +1,35 @@
 import { Dayjs } from "dayjs";
 
-interface Profile {
+type Profile = {
   $id: string;
   $createdAt?: string;
   email: string;
   fullName: string;
   fName: string;
   lName: string;
-  notifSettings: string;
-  themeSettings: string;
   subscription: Boolean;
   username: string;
   imageURL: string;
   API_KEY: string;
-}
+  notif: boolean;
+  pushToken: string;
+  weatherAlert: boolean;
+  messageAlert: boolean;
+  marketAlert: boolean;
+};
 
-interface MessageHistory {
+type MyNotifications = {
+  $id: string;
+  $createdAt?: Dayjs;
+  type: string;
+  message: string;
+  isRead: boolean;
+  userId: string;
+  receiverId: string;
+  senderProfile: string;
+};
+
+type MessageHistory = {
   $id: string;
   $createdAt: Dayjs;
   product_id: string;
@@ -23,9 +37,9 @@ interface MessageHistory {
   sender_id: string;
   receiver_id: string;
   imageUrl: string;
-}
+};
 
-interface ChatRoom {
+type ChatRoom = {
   $id: string;
   $createdAt: Dayjs;
   participants: string[];
@@ -34,16 +48,15 @@ interface ChatRoom {
   lastMessage: string;
   senderId: string;
   receiverId: string;
-}
+};
 
-interface Product {
+type Product = {
   $id: string;
   $createdAt: Dayjs;
   address: string;
   user_id: string;
   user_username: string;
   user_email: string;
-  user_fullName: string;
   productURL: string;
   description: string;
   price: number;
@@ -52,6 +65,6 @@ interface Product {
   city: string;
   country: string;
   region: string;
-}
+};
 
-export { ChatRoom, MessageHistory, Plot, Product, Profile, Tree_Record };
+export { ChatRoom, MessageHistory, MyNotifications, Product, Profile };

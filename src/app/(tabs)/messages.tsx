@@ -5,14 +5,14 @@ import { useMessage } from "@/src/contexts/MessageContext";
 import { useTheme } from "@/src/contexts/ThemeContext";
 import { globalFunction } from "@/src/global/fetchWithTimeout";
 import { storage } from "@/src/lib/appwrite";
-import { MessageHistory, Profile } from "@/types";
+import { MessageHistory } from "@/types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
+
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { Link, useRouter } from "expo-router";
@@ -32,16 +32,13 @@ import {
 import { ID } from "react-native-appwrite";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-dayjs.extend(utc);
-
 export default function Messages() {
   const userMessage = useMessage();
   const scrollViewRef = useRef<any>(null);
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const router = useRouter();
   const [lines, setLines] = useState(1);
   const [newMessage, setNewMessage] = useState("");
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [images, setImages] = useState("");
   const [loading, setLoading] = useState(true);
   const { theme } = useTheme();
@@ -58,28 +55,6 @@ export default function Messages() {
     const calculatedLines = Math.floor(contentHeight / lineHeight);
     setLines(calculatedLines);
   };
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.EXPO_PUBLIC_BASE_URL}/user/${user?.$id}`,
-          {
-            method: "GET",
-            headers: {
-              Accept: "application/json",
-            },
-          }
-        );
-
-        const data = await response.json();
-        setProfile(data);
-      } catch (error) {
-        console.error("Upload error:", error);
-      }
-    };
-    fetchProfile();
-  }, [user?.$id]);
 
   const pickAnImage = async () => {
     const permissionResult =
@@ -103,39 +78,39 @@ export default function Messages() {
   useEffect(() => {
     if (!user?.$id || !userMessage?.user?.$id) return;
 
+    const getMessages = async () => {
+      try {
+        const sentResponse = await fetch(
+          `${process.env.EXPO_PUBLIC_BASE_URL}/sent-messages/${user.$id}/${userMessage?.user?.$id}`
+        );
+        const sentMessages = await sentResponse.json();
+
+        const receivedResponse = await fetch(
+          `${process.env.EXPO_PUBLIC_BASE_URL}/received-messages/${user.$id}/${userMessage?.user?.$id}`
+        );
+        const receivedMessages = await receivedResponse.json();
+
+        const normalize = (msgs: MessageHistory[]) =>
+          msgs.map((msg) => ({
+            ...msg,
+            $createdAt: dayjs(msg.$createdAt),
+          }));
+
+        const combined = [
+          ...normalize(sentMessages),
+          ...normalize(receivedMessages),
+        ].sort((a, b) => a.$createdAt.valueOf() - b.$createdAt.valueOf());
+
+        setMessages(combined);
+      } catch (err) {
+        console.error("Error fetching messages:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     getMessages();
-  }, [messages]);
-
-  const getMessages = async () => {
-    try {
-      const sentResponse = await fetch(
-        `${process.env.EXPO_PUBLIC_BASE_URL}/sent-messages/${user?.$id}/${userMessage?.user?.$id}`
-      );
-      const sentMessages = await sentResponse.json();
-
-      const receivedResponse = await fetch(
-        `${process.env.EXPO_PUBLIC_BASE_URL}/received-messages/${user?.$id}/${userMessage?.user?.$id}`
-      );
-      const receivedMessages = await receivedResponse.json();
-
-      const normalize = (msgs: MessageHistory[]) =>
-        msgs.map((msg) => ({
-          ...msg,
-          $createdAt: dayjs(msg.$createdAt),
-        }));
-
-      const combined = [
-        ...normalize(sentMessages),
-        ...normalize(receivedMessages),
-      ].sort((a, b) => a.$createdAt.valueOf() - b.$createdAt.valueOf());
-
-      setMessages(combined);
-    } catch (err) {
-      console.error("Error fetching messages:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [user?.$id, userMessage?.user?.$id, messages]);
 
   const handleSend = async () => {
     setNewMessage("");
@@ -213,11 +188,6 @@ export default function Messages() {
   const rateAndFeedbackUser = async () => {
     try {
       setLoading(true);
-
-      if (!rateUser) {
-        return Alert.alert("Rate is missing", "Please rate the user.");
-      }
-
       const result = await globalFunction.fetchWithTimeout(
         `${process.env.EXPO_PUBLIC_BASE_URL}/rate`,
         {
@@ -232,6 +202,10 @@ export default function Messages() {
             API_KEY: profile?.API_KEY,
             rate: rateUser,
             feedback: feedback,
+            ratedByName: profile?.fullName,
+            ratedByImage: profile?.imageURL,
+            ratedName: userMessage.user?.fullName,
+            ratedImage: userMessage?.user?.imageURL,
           }),
         },
         20000
@@ -311,6 +285,7 @@ export default function Messages() {
               contentContainerStyle={{
                 flexGrow: 1,
                 justifyContent: "flex-end",
+                paddingVertical: 20,
                 gap: 12,
               }}
               onContentSizeChange={() =>
@@ -370,7 +345,10 @@ export default function Messages() {
                         </AppText>
                         {index === showDate && (
                           <AppText className="text-right text-xs mt-2">
-                            {msg.$createdAt.utc().local().format("hh:mm A")}
+                            {msg.$createdAt
+                              .utc()
+                              .local()
+                              .format("MM/DD/YYYY hh:mm A")}
                           </AppText>
                         )}
                       </TouchableOpacity>
@@ -494,7 +472,8 @@ export default function Messages() {
               textAlignVertical="top"
               value={feedback}
               onChangeText={setFeedback}
-              className="border-[1px] border-gray-500 h-28 w-72 rounded-lg"
+              placeholderTextColor="#6b7280"
+              className="border-[1px] text-slate-800 border-gray-500 h-28 w-72 rounded-lg"
             />
           </View>
         </ConfirmCancelModal>

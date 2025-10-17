@@ -2,6 +2,7 @@
   "expo": {
     "name": "rubbertapai-buyer",
     "slug": "rubbertapai-buyer",
+    "platforms": ["android", "web"],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -17,6 +18,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
+      "googleServicesFile": "./google-services.json",
       "package": "com.mayor007.rubbertapaibuyer"
     },
     "web": {
@@ -38,6 +40,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b46712b3-aeb1-4a0b-bfd2-6db554875d10"
+      }
     }
   }
 }

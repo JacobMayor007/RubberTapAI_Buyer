@@ -1,6 +1,9 @@
 import { Profile } from "@/types";
 import Entypo from "@expo/vector-icons/Entypo";
+import Feather from "@expo/vector-icons/Feather";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, Image, Modal, TouchableOpacity, View } from "react-native";
 import { reportUserFetch } from "../action/reportAction";
@@ -25,7 +28,9 @@ export default function ReportModal({
   const { theme } = useTheme();
   const [confirmModal, setConfirmModal] = useState(false);
   const [reportUser, setReportUser] = useState<Profile | null>(null);
-  const { user } = useAuth();
+  const [uri, setUri] = useState("");
+  const router = useRouter();
+  const { profile } = useAuth();
 
   const report = [
     {
@@ -84,29 +89,55 @@ export default function ReportModal({
     getUserId();
   }, [userId]);
 
+  const pickAnImage = async () => {
+    try {
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (permissionResult.granted === false) {
+        alert("Permission to access camera roll is required!");
+        return;
+      }
+
+      let result = await ImagePicker.launchImageLibraryAsync({
+        quality: 1,
+        aspect: [1, 1],
+      });
+
+      if (!result.canceled) {
+        const selectedUris = result.assets[0].uri;
+        setUri(selectedUris);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const reportHandle = async () => {
     try {
       const result = await reportUserFetch(
+        profile?.$id || "",
+        profile?.fullName || "",
+        profile?.imageURL || "",
         userId,
-        user?.$id || "",
+        reportUser?.fullName || "",
+        reportUser?.imageURL || "",
+        description || "",
         label || "",
-        description || ""
+        uri,
+        profile?.API_KEY || ""
       );
 
-      // Handle successful response
       if (result.success) {
         Alert.alert("Success", result.message);
         setConfirmModal(false);
       }
     } catch (error) {
-      // Errors are already handled in reportUserFetch
       console.error("Report submission failed:", error);
     } finally {
       setConfirmModal(false);
+      router.push({ pathname: "/(tabs)/messages" });
     }
   };
-
-  console.log(label, description, userId, user?.$id);
 
   return (
     <View className="flex-1 bg-[#FFECCC] justify-between">
@@ -162,6 +193,32 @@ export default function ReportModal({
               )
             );
           })}
+        </View>
+        <View className="flex-row justify-between mt-4 px-10">
+          <TouchableOpacity
+            onPress={pickAnImage}
+            className="border-[6px] border-dashed h-52 w-1/2 flex-col items-center justify-center gap-4"
+          >
+            <FontAwesome5 name="upload" size={40} color="#8F8F8F" />
+            <AppText
+              color="light"
+              className="bg-[#F09D58] font-poppins text-xl px-4 py-2 rounded-full"
+            >
+              Browse Files
+            </AppText>
+          </TouchableOpacity>
+          <View className="flex-row">
+            <Image src={uri} width={100} height={208} />
+            {uri && (
+              <Feather
+                name="x-circle"
+                onPress={() => setUri("")}
+                size={24}
+                color="red"
+                className="absolute right-0 -top-4"
+              />
+            )}
+          </View>
         </View>
       </View>
       <TouchableOpacity

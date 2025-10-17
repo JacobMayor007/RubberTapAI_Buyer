@@ -21,15 +21,18 @@ type Profile = {
   $id: string;
   $createdAt?: string;
   email: string;
-  username: string;
   fullName: string;
   fName: string;
   lName: string;
-  notifSettings: string;
-  themeSettings: string;
   subscription: Boolean;
+  username: string;
   imageURL: string;
   API_KEY: string;
+  notif: boolean;
+  pushToken: string;
+  weatherAlert: boolean;
+  messageAlert: boolean;
+  marketAlert: boolean;
 } | null;
 
 type AuthContextType = {

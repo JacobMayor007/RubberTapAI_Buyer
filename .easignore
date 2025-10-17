@@ -31,19 +31,16 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
+.env*local.
 
 # typescript
 *.tsbuildinfo
 
-*.env
-
 .env
-
-google-services.json
 
 app-example
 
+/ios
+
 /android
 
-/ios

@@ -1,5 +1,10 @@
+import { MyNotifications, Profile } from "@/types";
+import dayjs from "dayjs";
+import * as FileSystem from "expo-file-system";
+import { Alert } from "react-native";
+import { ID } from "react-native-appwrite";
 import { globalFunction } from "../global/fetchWithTimeout";
-import { account } from "../lib/appwrite";
+import { account, storage } from "../lib/appwrite";
 
 const editName = async (name: string, userId: string, key: string) => {
   try {
@@ -76,4 +81,220 @@ const editEmail = async (
   }
 };
 
-export { editEmail, editName };
+const getMyUnreadNotif = async (userId: string, API_KEY: string) => {
+  try {
+    const response = await globalFunction.fetchWithTimeout(
+      `${process.env.EXPO_PUBLIC_BASE_URL}/notifications`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, API_KEY }),
+      },
+      20000
+    );
+
+    const data = await response.json();
+
+    const dataJSON = data.map((doc: MyNotifications) => ({
+      ...doc,
+      $createdAt: dayjs(doc.$createdAt),
+    }));
+
+    return dataJSON;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const updateNotif = async (user: Profile | null) => {
+  try {
+    console.log(user?.marketAlert);
+    console.log(user?.weatherAlert);
+    console.log(user?.messageAlert);
+
+    const result = await globalFunction.fetchWithTimeout(
+      `${process.env.EXPO_PUBLIC_BASE_URL}/notif`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          userId: user?.$id,
+          API_KEY: user?.API_KEY,
+          notif: !user?.notif,
+        }),
+      },
+      2000
+    );
+
+    const data = await result.json();
+    console.log(data?.title);
+
+    return;
+  } catch (error) {
+    console.error(error);
+    return Alert.alert("Error occured, please try again!");
+  }
+};
+
+const updateWeather = async (user: Profile | null) => {
+  try {
+    const result = await globalFunction.fetchWithTimeout(
+      `${process.env.EXPO_PUBLIC_BASE_URL}/weather-alert`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          userId: user?.$id,
+          API_KEY: user?.API_KEY,
+          weather: !user?.weatherAlert,
+        }),
+      },
+      2000
+    );
+
+    const data = await result.json();
+    console.log(data?.title);
+
+    return;
+  } catch (error) {
+    console.error(error);
+    return Alert.alert("Error occured, please try again!");
+  }
+};
+const updateMessage = async (user: Profile | null) => {
+  try {
+    const result = await globalFunction.fetchWithTimeout(
+      `${process.env.EXPO_PUBLIC_BASE_URL}/message-alert`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          userId: user?.$id,
+          API_KEY: user?.API_KEY,
+          message: !user?.messageAlert,
+        }),
+      },
+      2000
+    );
+
+    const data = await result.json();
+    console.log(data?.title);
+
+    return;
+  } catch (error) {
+    console.error(error);
+    return Alert.alert("Error occured, please try again!");
+  }
+};
+
+const updateMarket = async (user: Profile | null) => {
+  try {
+    const result = await globalFunction.fetchWithTimeout(
+      `${process.env.EXPO_PUBLIC_BASE_URL}/market-alert`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          userId: user?.$id,
+          API_KEY: user?.API_KEY,
+          market: !user?.marketAlert,
+        }),
+      },
+      2000
+    );
+
+    const data = await result.json();
+    console.log(data?.title);
+
+    return;
+  } catch (error) {
+    console.error(error);
+    return Alert.alert("Error occured, please try again!");
+  }
+};
+
+const updateProfileAction = async (
+  userId: string,
+  API_KEY: string,
+  uri: string
+) => {
+  try {
+    var fileUrl = "";
+
+    if (!uri) {
+      return Alert.alert("No Image", "Please enter an image");
+    }
+
+    const fileInfo = await FileSystem.getInfoAsync(uri);
+
+    if (!fileInfo.exists) {
+      return Alert.alert("No File Info");
+    }
+
+    if (fileInfo.exists) {
+      const result = await storage.createFile(
+        `${process.env.EXPO_PUBLIC_APPWRITE_STORAGE}`,
+        ID.unique(),
+        {
+          uri: uri,
+          name: `image_${Date.now()}.jpg`,
+          type: "image/jpeg",
+          size: fileInfo.size,
+        }
+      );
+
+      fileUrl = `${process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.EXPO_PUBLIC_APPWRITE_STORAGE}/files/${result.$id}/view?project=${process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID}&mode=admin`;
+
+      const data = {
+        userId,
+        API_KEY,
+        file: fileUrl,
+      };
+
+      const response = await globalFunction.fetchWithTimeout(
+        `${process.env.EXPO_PUBLIC_BASE_URL}/profile`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify(data),
+        },
+        20000
+      );
+
+      const jsonData = await response.json();
+
+      return Alert.alert(jsonData.title, jsonData.message);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export {
+  editEmail,
+  editName,
+  getMyUnreadNotif,
+  updateMarket,
+  updateMessage,
+  updateNotif,
+  updateProfileAction,
+  updateWeather,
+};
