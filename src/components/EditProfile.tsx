@@ -15,8 +15,10 @@ import {
 
 import { editEmail, editName } from "../action/userAction";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 import { account } from "../lib/appwrite";
 import { AppText } from "./AppText";
+import BackgroundGradient from "./BackgroundGradient";
 import ConfirmCancelModal from "./ConfirmOrCancelModal";
 import Loading from "./LoadingComponent";
 
@@ -33,6 +35,7 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
   const [newEmail, setNewEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { theme } = useTheme();
   const [uri, setUri] = useState("");
 
   useEffect(() => {
@@ -125,22 +128,28 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
   };
 
   return (
-    <View className="bg-[#FFECCC] flex-1 ">
+    <BackgroundGradient className=" flex-1 ">
       <View className="flex-row items-center gap-7 m-6">
         <Feather
           name="arrow-left"
           size={28}
+          color={theme === "dark" ? `#E2C282` : `black`}
           onPress={() => setVisibleModal(false)}
         />
-        <AppText color="dark" className="font-poppins font-bold text-2xl">
+        <AppText
+          color={theme === "dark" ? `light` : `dark`}
+          className="font-poppins font-bold text-2xl"
+        >
           Edit Profile
         </AppText>
       </View>
       <LinearGradient
-        colors={["#75A90A", "#046A10"]}
+        colors={
+          theme === "dark" ? ["#03865a", "#101010"] : ["#FFFFFF", "#10B981"]
+        }
         style={{
           width: "100%",
-          height: 96,
+          height: 150,
         }}
       />
       <View className="m-6">
@@ -151,20 +160,27 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
             className="h-16 w-16 rounded-full bg-[#fee0ac]"
           />
           <TouchableOpacity onPress={pickAnImage}>
-            <AppText className="font-bold italic underline ">
+            <AppText
+              color={theme === "dark" ? `light` : `dark`}
+              className="font-bold italic underline "
+            >
               Edit Picture
             </AppText>
           </TouchableOpacity>
         </View>
-        <AppText color="dark" className="font-poppins font-bold text-lg mt-7">
+        <AppText
+          color={theme === "dark" ? `light` : `dark`}
+          className="font-poppins font-bold text-lg mt-7"
+        >
           Name:
         </AppText>
         <View
           className={`${editProfile === "name" ? `border-[1px] rounded-md border-green-500 px-4 ` : `border-b-[0.5px]`} flex-row items-center justify-between`}
         >
           <TextInput
+            placeholderTextColor={theme === "dark" ? `#E2C282` : `black`}
             readOnly={editProfile === "name" ? false : true}
-            className={`w-9/12 text-lg`}
+            className={`w-9/12 text-lg ${theme === "dark" ? `#E2C282` : `black`}`}
             value={name}
             onChangeText={(e) => setName(e)}
           />
@@ -197,20 +213,24 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
                 onPress={() => {
                   setEditProfile("name");
                 }}
-                color="#001A6E"
+                color={theme === "dark" ? `white` : `"#001A6E"`}
               />
             </TouchableOpacity>
           )}
         </View>
-        <AppText color="dark" className="font-poppins font-bold text-lg mt-5">
+        <AppText
+          color={theme === "dark" ? `light` : `dark`}
+          className="font-poppins font-bold text-lg mt-5"
+        >
           Email:
         </AppText>
         <View
           className={`border-b-[0.5px] flex-row items-center justify-between`}
         >
           <TextInput
+            placeholderTextColor={theme === "dark" ? `#E2C282` : `black`}
             readOnly={editProfile === "email" ? false : true}
-            className="text-lg"
+            className={`text-lg ${theme === "dark" ? `#E2C282` : `black`}`}
             value={email}
           />
 
@@ -222,14 +242,14 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
                 setEditProfile("email");
                 setConfirmModal(true);
               }}
-              color="#001A6E"
+              color={theme === "dark" ? `white` : `"#001A6E"`}
             />
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity className="items-end mt-4">
           <AppText
-            color="light"
+            color={theme === "dark" ? `light` : `dark`}
             className="bg-[#75A90A] text-white/90 p-3 rounded-full"
           >
             Change Password
@@ -252,7 +272,7 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
             onOk={handleEditName}
           >
             <AppText
-              color="dark"
+              color={theme === "dark" ? `light` : `dark`}
               className="m-auto text-center font-bold text-lg"
             >
               Do you want to confirm your update on your name?
@@ -273,7 +293,10 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
             onOk={() => setEditProfile("confirmEmail")}
           >
             <View className="mt-8 gap-4 ">
-              <AppText color="dark" className="font-poppins text-lg font-bold">
+              <AppText
+                color={theme === "dark" ? `light` : `dark`}
+                className="font-poppins text-lg font-bold"
+              >
                 Enter credentials to update:
               </AppText>
               <TextInput
@@ -309,7 +332,7 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
               <Loading className="h-14 w-14 m-auto pb-4" />
             ) : (
               <AppText
-                color="dark"
+                color={theme === "dark" ? `light` : `dark`}
                 className="m-auto text-center font-bold text-lg"
               >
                 Do you want to confirm your update on your email?
@@ -318,7 +341,7 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
           </ConfirmCancelModal>
         )}
       </Modal>
-    </View>
+    </BackgroundGradient>
   );
 }
 

@@ -1,5 +1,6 @@
 import AppearanceSettings from "@/src/components/AppearanceSettings";
 import { AppText } from "@/src/components/AppText";
+import BackgroundGradient from "@/src/components/BackgroundGradient";
 import BottomNav from "@/src/components/BottomNav";
 import EditProfile from "@/src/components/EditProfile";
 import HeaderNav from "@/src/components/HeaderNav";
@@ -23,25 +24,13 @@ export default function Menu() {
 
   return (
     <SafeAreaView className="flex-1">
-      <View
-        className={`${theme === "dark" ? `bg-slate-900/50` : `bg-[#FFECCC]`} flex-1 relative`}
-      >
-        <View className="absolute z-10">
-          <LinearGradient
-            style={{
-              height: 600,
-              width: 400,
-              borderRadius: 200,
-              transform: "rotate(270deg)",
-              top: -310,
-            }}
-            colors={["#10B981", "#CED7CF"]}
-          />
-        </View>
+      <BackgroundGradient className={`flex-1 `}>
         <View className={` z-20 gap-4 p-6`}>
           <HeaderNav arrow={true} title="" />
           <LinearGradient
-            colors={["#CED7CF", "#10B981"]}
+            colors={
+              theme === "dark" ? ["#03865a", "#101010"] : ["#FFFFFF", "#10B981"]
+            }
             style={{ borderRadius: 10, padding: 16 }}
             className="h-64 mt-10"
           >
@@ -54,7 +43,7 @@ export default function Menu() {
                   className="rounded-full"
                 />
                 <AppText
-                  color="dark"
+                  color={theme === "dark" ? `light` : `dark`}
                   className="text-lg font-poppins font-bold"
                 >
                   {profile?.fullName}
@@ -67,17 +56,33 @@ export default function Menu() {
                 }}
                 className="bg-[#10B981] px-7 py-1 rounded-full"
               >
-                <AppText color="light">Edit</AppText>
+                <AppText color={theme === "dark" ? `light` : `dark`}>
+                  Edit
+                </AppText>
               </TouchableOpacity>
             </View>
             <View className="mt-10 gap-2">
               <View>
-                <AppText className="font-poppins font-bold">Username:</AppText>
-                <AppText>{profile?.username}</AppText>
+                <AppText
+                  color={theme === "dark" ? `light` : `dark`}
+                  className="font-poppins font-bold"
+                >
+                  Username:
+                </AppText>
+                <AppText color={theme === "dark" ? `light` : `dark`}>
+                  {profile?.username}
+                </AppText>
               </View>
               <View>
-                <AppText className="font-poppins font-bold">Email:</AppText>
-                <AppText>{profile?.email}</AppText>
+                <AppText
+                  color={theme === "dark" ? `light` : `dark`}
+                  className="font-poppins font-bold"
+                >
+                  Email:
+                </AppText>
+                <AppText color={theme === "dark" ? `light` : `dark`}>
+                  {profile?.email}
+                </AppText>
               </View>
             </View>
           </LinearGradient>
@@ -158,12 +163,10 @@ export default function Menu() {
           </AppText>
           <Ionicons name="exit-outline" size={32} color={"red"} />
         </TouchableOpacity>
-      </View>
-      <View
-        className={`${theme === "dark" ? `bg-slate-900/50` : `bg-[#FFECCC]`}`}
-      >
-        <BottomNav title="menu" />
-      </View>
+        <View className="absolute bottom-0 w-full">
+          <BottomNav title="menu" />
+        </View>
+      </BackgroundGradient>
       <Modal
         visible={visibleModal}
         animationType="slide"

@@ -1,8 +1,10 @@
 import { AppText } from "@/src/components/AppText";
+import BackgroundGradient from "@/src/components/BackgroundGradient";
 import BottomNav from "@/src/components/BottomNav";
 import Logo from "@/src/components/Logo";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useMessage } from "@/src/contexts/MessageContext";
+import { useTheme } from "@/src/contexts/ThemeContext";
 import { ChatRoom, Profile } from "@/types";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Fontisto from "@expo/vector-icons/Fontisto";
@@ -32,6 +34,7 @@ export default function ChatBox() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const messageUser = useMessage();
   const { user } = useAuth();
+  const { theme } = useTheme();
 
   useEffect(() => {
     handleFirstLoad();
@@ -165,16 +168,17 @@ export default function ChatBox() {
 
   return (
     <SafeAreaView className="flex-1">
-      <View className="flex-1 flex-col gap-2 p-6 bg-[#E8DFD0] border">
+      <BackgroundGradient className="flex-1 flex-col gap-2 p-6">
         <View className="flex-row items-center  gap-2 justify-between">
           <View className="flex-row gap-4 items-center">
             <FontAwesome5
               name="arrow-left"
               size={20}
+              color={theme === "dark" ? `#E2C282` : `black`}
               onPress={() => router.push("/(tabs)")}
             />
             <AppText
-              color={"dark"}
+              color={theme === "dark" ? `light` : `dark`}
               className="font-poppins font-bold text-2xl tracking-wider"
             >
               Chat
@@ -185,7 +189,7 @@ export default function ChatBox() {
         <View className="mt-2  bg-[rgb(43,43,43,0.2)] h-11 rounded-2xl flex-row items-center gap-3 px-4">
           <Fontisto name="search" size={20} color={`white`} />
           <AppText
-            color={"light"}
+            color={theme === "dark" ? `light` : `dark`}
             onPress={() => setVisibleModal(true)}
             className="w-11/12 h-full pt-2.5"
           >
@@ -231,14 +235,17 @@ export default function ChatBox() {
                     }}
                   >
                     <AppText
-                      color="dark"
+                      color={theme === "dark" ? `light` : `dark`}
                       className="font-poppins font-bold text-lg ml-2"
                     >
                       {other.username || "You"}
                     </AppText>
 
                     <View className="flex-row items-center gap-2 pl-2 ">
-                      <AppText className="text-sm font-light" color="dark">
+                      <AppText
+                        className="text-sm font-light"
+                        color={theme === "dark" ? `light` : `dark`}
+                      >
                         {chat.senderId === profile?.$id
                           ? "You:"
                           : `${other.username.split(" ")[0]}:`}{" "}
@@ -246,10 +253,16 @@ export default function ChatBox() {
                           ? `${chat?.lastMessage.slice(0, 24)}...`
                           : chat?.lastMessage}
                       </AppText>
-                      <AppText color="dark" className="font-bold">
+                      <AppText
+                        color={theme === "dark" ? `light` : `dark`}
+                        className="font-bold"
+                      >
                         &#8226;
                       </AppText>
-                      <AppText color="dark" className="text-sm font-light">
+                      <AppText
+                        color={theme === "dark" ? `light` : `dark`}
+                        className="text-sm font-light"
+                      >
                         {dayjs(chat.$createdAt).local().format("hh:mm A")}
                       </AppText>
                     </View>
@@ -261,7 +274,7 @@ export default function ChatBox() {
           </ScrollView>
         )}
         {!loading && <BottomNav title="chat" />}
-      </View>
+      </BackgroundGradient>
       <Modal
         visible={visibleModal}
         animationType="slide"

@@ -1,16 +1,16 @@
 import { AppText } from "@/src/components/AppText";
+import BackgroundGradient from "@/src/components/BackgroundGradient";
 import BottomNav from "@/src/components/BottomNav";
 import { Button } from "@/src/components/Button";
 import HeaderNav from "@/src/components/HeaderNav";
 import RubberPrice from "@/src/components/RubberPrice";
 import ViewDetails from "@/src/components/ViewDetails";
 import { useAuth } from "@/src/contexts/AuthContext";
+import { useTheme } from "@/src/contexts/ThemeContext";
 import { globalFunction } from "@/src/global/fetchWithTimeout";
 import { Product } from "@/types";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import dayjs from "dayjs";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
@@ -40,8 +40,7 @@ export default function Dashboard() {
   const { user, profile } = useAuth();
   const [modal, setModal] = useState(false);
   const [viewProduct, setViewProduct] = useState<Product | null>(null);
-  const [rubberPrice, setRubberPrice] = useState("");
-  const [weekChange, setWeekChange] = useState("");
+  const { theme } = useTheme();
 
   useEffect(() => {
     getProducts();
@@ -170,149 +169,105 @@ export default function Dashboard() {
     }
   };
 
-  useEffect(() => {
-    const getRubberPrice = async () => {
-      const rubberPriceExist = await AsyncStorage.getItem("rubber_price");
-      const weekChangeExist = await AsyncStorage.getItem("week_change");
-      const todayStorage = await AsyncStorage.getItem("today_date");
-      const now = dayjs().format("YYYY-MM-DD");
-      const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
-
-      console.log("Rubber Price async: ", rubberPriceExist);
-      console.log("Week change async", weekChangeExist);
-
-      console.log(todayStorage);
-      console.log(yesterday);
-
-      if (todayStorage === null || todayStorage === yesterday) {
-        await AsyncStorage.removeItem("rubber_price");
-        await AsyncStorage.removeItem("week_change");
-        await AsyncStorage.removeItem("today_date");
-      } else {
-      }
-
-      if (!rubberPriceExist || !weekChangeExist) {
-        console.log("It Mount");
-
-        const response = await globalFunction.fetchWithTimeout(
-          `${process.env.EXPO_PUBLIC_BASE_URL}/commodity-price`,
-          {
-            method: "GET",
-            headers: {
-              Accept: "application/json",
-            },
-          },
-          20000
-        );
-
-        const data = await response.json();
-
-        await AsyncStorage.setItem("rubber_price", data.price);
-        await AsyncStorage.setItem("week_change", data.weekchange);
-        await AsyncStorage.setItem("today_date", now);
-        setRubberPrice(data.price);
-        setWeekChange(data.weekchange);
-
-        return;
-      } else {
-        setRubberPrice(rubberPriceExist);
-        setWeekChange(weekChangeExist);
-
-        return;
-      }
-    };
-
-    getRubberPrice();
-  }, []);
-
   return (
     <SafeAreaView className="flex-1 flex-col justify-between">
-      <ScrollView
-        className="relative"
-        contentContainerStyle={{
-          flexGrow: 1,
-          position: "relative",
-          backgroundColor: "#FFECCC",
-        }}
-      >
-        <View className="absolute z-10">
-          <View
-            style={{
-              height: 500,
-              width: 400,
-              borderRadius: 170,
-              transform: "rotate(180deg)",
-              top: -250,
-              backgroundColor: "#10B981",
-            }}
-          />
-        </View>
+      <BackgroundGradient className="flex-1">
+        <ScrollView
+          className="relative"
+          contentContainerStyle={{
+            flexGrow: 1,
+            position: "relative",
+          }}
+        >
+          <View className="z-20 p-6">
+            <HeaderNav title="Dashboard" />
+            <RubberPrice />
+            <AppText
+              color={theme === "dark" ? `light` : `dark`}
+              className="mt-5 mb-4 font-poppins font-bold text-xl"
+            >
+              Latex & Waste Rubber Trade
+            </AppText>
+            <View
+              className={`h-11 px-4 mb-8 rounded-full ${theme === "dark" ? `bg-[#626262]` : `bg-[#e0ccac]`} flex-row items-center gap-1`}
+            >
+              <Feather name="search" color="white" size={18} />
+              <TextInput
+                placeholder="Search"
+                placeholderTextColor={"#FFFFFF"}
+                className="w-11/12 text-base items-center"
+                onChangeText={(e) => setSearch(e)}
+                value={search}
+              />
+            </View>
 
-        <View className="z-20 p-6">
-          <HeaderNav title="Dashboard" />
-          <RubberPrice />
-          <AppText className="mt-5 mb-4 font-poppins font-bold text-xl">
-            Latex & Waste Rubber Trade
-          </AppText>
-          <View className="h-11 px-4 mb-8 rounded-full bg-[#e0ccac] flex-row items-center gap-1">
-            <Feather name="search" color="white" size={18} />
-            <TextInput
-              placeholder="Search"
-              placeholderTextColor={"#FFFFFF"}
-              className="w-11/12 text-base items-center"
-              onChangeText={(e) => setSearch(e)}
-              value={search}
-            />
-          </View>
-
-          {products.map((data, index) => {
-            return (
-              <View
-                key={index}
-                className="w-1/2 gap-1 p-4 bg-[#F3E0C1]"
-                style={{
-                  boxShadow: "rgba(0, 0, 0, 0.24) 0px 4px 8px",
-                  borderRadius: 10,
-                }}
-              >
-                <Image src={data?.productURL} height={120} />
-                <AppText
-                  color="dark"
-                  className="capitalize font-bold font-poppins text-xl"
-                >
-                  {data?.category}
-                </AppText>
-                <AppText className="mt-2">
-                  <FontAwesome6 name="peso-sign" />
-                  {data?.price}
-                  {" /kg"}
-                </AppText>
-                <AppText className="mb-3">{data?.city}</AppText>
-                <Button
-                  title="View Details"
-                  className="py-1 font-bold"
-                  color="light"
-                  onPress={() => {
-                    setModal(true);
-                    setViewProduct(data);
+            {products.map((data, index) => {
+              return (
+                <View
+                  key={index}
+                  className={`w-full gap-4 p-4 ${theme === "dark" ? `bg-[#626262]` : `bg-[#F3E0C1]`} flex-row mb-4`}
+                  style={{
+                    boxShadow: "rgba(0, 0, 0, 0.24) 0px 4px 8px",
+                    borderRadius: 10,
                   }}
-                />
-              </View>
-            );
-          })}
+                >
+                  <Image
+                    src={data?.productURL}
+                    borderRadius={10}
+                    width={175}
+                    height={150}
+                  />
+                  <View className="flex flex-col gap-1 w-1/2">
+                    <AppText
+                      color={theme === "dark" ? `light` : "dark"}
+                      className="capitalize font-bold font-poppins text-xl"
+                    >
+                      {data?.category}
+                    </AppText>
+                    <AppText
+                      color={theme === "dark" ? `light` : "dark"}
+                      className="mt-2 text-lg font-bold"
+                    >
+                      <FontAwesome6 name="peso-sign" />
+                      {data?.price}
+                      {" /kg"}
+                    </AppText>
+                    <AppText
+                      color={theme === "dark" ? `light` : "dark"}
+                      className="mb-3 text-sm"
+                    >
+                      {data?.city}
+                    </AppText>
+                    <Button
+                      style={{
+                        alignSelf: "flex-end",
+                      }}
+                      title="View Details"
+                      className="py-1 px-2 font-bold mr-2"
+                      color="light"
+                      onPress={() => {
+                        setModal(true);
+                        setViewProduct(data);
+                      }}
+                    />
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        </ScrollView>
+        <View>
+          <BottomNav title="home" />
         </View>
-      </ScrollView>
-      <View className="bg-[#FFECCC]">
-        <BottomNav title="home" />
-      </View>
-      <Modal
-        animationType="slide"
-        visible={modal}
-        onRequestClose={() => setModal(false)}
-        transparent
-      >
-        <ViewDetails setModal={setModal} product={viewProduct} />
-      </Modal>
+        <Modal
+          animationType="slide"
+          visible={modal}
+          onRequestClose={() => setModal(false)}
+          transparent
+        >
+          <ViewDetails setModal={setModal} product={viewProduct} />
+        </Modal>
+      </BackgroundGradient>
     </SafeAreaView>
   );
 }

@@ -288,6 +288,28 @@ const updateProfileAction = async (
   }
 };
 
+const updateReadAllNotif = async (userId: string, API_KEY: string) => {
+  try {
+    const response = await globalFunction.fetchWithTimeout(
+      `${process.env.EXPO_PUBLIC_BASE_URL}/notifications`,
+      {
+        method: "PATCH",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, API_KEY }),
+      },
+      20000
+    );
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export {
   editEmail,
   editName,
@@ -296,5 +318,6 @@ export {
   updateMessage,
   updateNotif,
   updateProfileAction,
+  updateReadAllNotif,
   updateWeather,
 };
