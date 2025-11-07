@@ -14,7 +14,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Image,
   Modal,
@@ -169,6 +169,16 @@ export default function Dashboard() {
     }
   };
 
+  const filteredProducts = useMemo(() => {
+    if (!search.trim()) return products;
+    return products.filter((p) =>
+      [p.category, p.city, p.price?.toString()]
+        .join(" ")
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    );
+  }, [search, products]);
+
   return (
     <SafeAreaView className="flex-1 flex-col justify-between">
       <BackgroundGradient className="flex-1">
@@ -195,13 +205,13 @@ export default function Dashboard() {
               <TextInput
                 placeholder="Search"
                 placeholderTextColor={"#FFFFFF"}
-                className="w-11/12 text-base items-center"
+                className={`w-11/12 text-base items-center ${theme === "dark" ? `text-white` : `text-black`} font-bold`}
                 onChangeText={(e) => setSearch(e)}
                 value={search}
               />
             </View>
 
-            {products.map((data, index) => {
+            {filteredProducts.map((data, index) => {
               return (
                 <View
                   key={index}

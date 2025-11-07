@@ -2,6 +2,7 @@ import { AppText } from "@/src/components/AppText";
 import { Button } from "@/src/components/Button";
 import Loading from "@/src/components/LoadingComponent";
 import Logo from "@/src/components/Logo";
+import TermsAndCon from "@/src/components/TermsAndCon";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { globalFunction } from "@/src/global/fetchWithTimeout";
 import { account } from "@/src/lib/appwrite";
@@ -13,6 +14,7 @@ import {
   Alert,
   ImageBackground,
   KeyboardAvoidingView,
+  Modal,
   Pressable,
   ScrollView,
   TextInput,
@@ -25,6 +27,7 @@ export default function Register() {
   const [focusedInput, setFocusedInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [modal, setModal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [userInfo, setUserInfo] = useState({
     fullName: "",
@@ -134,8 +137,6 @@ export default function Register() {
         email: userInfo.email,
         imageURL: `https://ui-avatars.com/api/?name=${encodeURIComponent(userInfo.userName)}&background=random`,
         role: "buyer",
-        notifSettings: false,
-        themeSettings: false,
         subscription: false,
       };
 
@@ -348,7 +349,10 @@ export default function Register() {
                   onValueChange={() => setAgree((prev) => !prev)}
                   className={agree ? "#4630EB" : undefined}
                 />
-                <AppText className="text-[#a3c461] font-semibold font-poppins">
+                <AppText
+                  onPress={() => setModal(true)}
+                  className="text-[#a3c461] font-semibold font-poppins"
+                >
                   Agree to terms & conditions
                 </AppText>
               </View>
@@ -374,6 +378,9 @@ export default function Register() {
           </ScrollView>
         </KeyboardAvoidingView>
       </ImageBackground>
+      <Modal visible={modal} onRequestClose={() => setModal(false)}>
+        <TermsAndCon setModal={setModal} />
+      </Modal>
     </SafeAreaView>
   );
 }

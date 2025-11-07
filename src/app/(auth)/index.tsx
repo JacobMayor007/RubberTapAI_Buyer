@@ -192,7 +192,7 @@ export default function Login() {
                   <Button
                     title="Login"
                     onPress={signIn}
-                    className="rounded-full font-bold font-poppins text-lg py-1"
+                    className="rounded-lg font-bold font-poppins text-lg py-1"
                   />
                 </View>
               </View>
