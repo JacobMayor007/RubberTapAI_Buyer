@@ -1,7 +1,7 @@
+import { Profile } from "@/types";
 import Feather from "@expo/vector-icons/Feather";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as ImagePicker from "expo-image-picker";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -12,13 +12,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-import { editEmail, editName } from "../action/userAction";
+import { editEmail, editName, updateProfileAction } from "../action/userAction";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { account } from "../lib/appwrite";
 import { AppText } from "./AppText";
 import BackgroundGradient from "./BackgroundGradient";
+
+import ChangePassword from "./ChangePassword";
 import ConfirmCancelModal from "./ConfirmOrCancelModal";
 import Loading from "./LoadingComponent";
 
@@ -27,7 +28,8 @@ type AppearanceProps = {
 };
 
 export default function EditProfile({ setVisibleModal }: AppearanceProps) {
-  const { profile } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const { user, logout } = useAuth();
   const [editProfile, setEditProfile] = useState("");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -35,20 +37,32 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
   const [newEmail, setNewEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { theme } = useTheme();
   const [uri, setUri] = useState("");
+  const { theme } = useTheme();
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        setEmail(profile?.email || "");
-        setName(profile?.fullName || "");
+        const response = await fetch(
+          `${process.env.EXPO_PUBLIC_BASE_URL}/user/${user?.$id}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        );
+
+        const data: Profile = await response.json();
+        setProfile(data);
+        setEmail(data?.email);
+        setName(data?.fullName);
       } catch (error) {
         console.error("Upload error:", error);
       }
     };
     fetchProfile();
-  }, [profile]);
+  }, [user?.$id]);
 
   const handleEditName = async () => {
     try {
@@ -65,6 +79,8 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
       console.error(error);
     } finally {
       setLoading(false);
+      setConfirmModal(false);
+      setEditProfile("");
     }
   };
 
@@ -124,63 +140,66 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setEditProfile("confirmProfilePic");
+    }
+  };
+
+  const updateProfile = async () => {
+    try {
+      setLoading(true);
+      await updateProfileAction(user?.$id || "", profile?.API_KEY || "", uri);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setEditProfile("");
+      setConfirmModal(false);
+      setLoading(false);
+      useAuth();
     }
   };
 
   return (
-    <BackgroundGradient className=" flex-1 ">
+    <BackgroundGradient className="flex-1 ">
       <View className="flex-row items-center gap-7 m-6">
         <Feather
           name="arrow-left"
           size={28}
-          color={theme === "dark" ? `#E2C282` : `black`}
           onPress={() => setVisibleModal(false)}
         />
-        <AppText
-          color={theme === "dark" ? `light` : `dark`}
-          className="font-poppins font-bold text-2xl"
-        >
+        <AppText color="dark" className="font-poppins font-bold text-2xl">
           Edit Profile
         </AppText>
       </View>
-      <LinearGradient
-        colors={
-          theme === "dark" ? ["#03865a", "#101010"] : ["#FFFFFF", "#10B981"]
-        }
-        style={{
-          width: "100%",
-          height: 150,
-        }}
-      />
+
       <View className="m-6">
-        <View className="flex-col justify-center gap-2">
+        <View className="flex-row items-end ">
           <Image
-            src={profile?.imageURL}
+            src={uri ? uri : profile?.imageURL}
             fadeDuration={300}
             className="h-16 w-16 rounded-full bg-[#fee0ac]"
           />
-          <TouchableOpacity onPress={pickAnImage}>
-            <AppText
-              color={theme === "dark" ? `light` : `dark`}
-              className="font-bold italic underline "
-            >
-              Edit Picture
-            </AppText>
+          <TouchableOpacity>
+            <MaterialIcons
+              name="edit"
+              size={20}
+              onPress={() => {
+                setEditProfile("profile");
+                setConfirmModal(true);
+              }}
+              color="#001A6E"
+            />
           </TouchableOpacity>
         </View>
-        <AppText
-          color={theme === "dark" ? `light` : `dark`}
-          className="font-poppins font-bold text-lg mt-7"
-        >
+        <AppText color="dark" className="font-poppins font-bold text-lg mt-4">
           Name:
         </AppText>
         <View
           className={`${editProfile === "name" ? `border-[1px] rounded-md border-green-500 px-4 ` : `border-b-[0.5px]`} flex-row items-center justify-between`}
         >
           <TextInput
-            placeholderTextColor={theme === "dark" ? `#E2C282` : `black`}
             readOnly={editProfile === "name" ? false : true}
-            className={`w-9/12 text-lg ${theme === "dark" ? `#E2C282` : `black`}`}
+            className={`w-9/12 text-lg`}
             value={name}
             onChangeText={(e) => setName(e)}
           />
@@ -213,24 +232,20 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
                 onPress={() => {
                   setEditProfile("name");
                 }}
-                color={theme === "dark" ? `white` : `"#001A6E"`}
+                color="#001A6E"
               />
             </TouchableOpacity>
           )}
         </View>
-        <AppText
-          color={theme === "dark" ? `light` : `dark`}
-          className="font-poppins font-bold text-lg mt-5"
-        >
+        <AppText color="dark" className="font-poppins font-bold text-lg mt-5">
           Email:
         </AppText>
         <View
           className={`border-b-[0.5px] flex-row items-center justify-between`}
         >
           <TextInput
-            placeholderTextColor={theme === "dark" ? `#E2C282` : `black`}
             readOnly={editProfile === "email" ? false : true}
-            className={`text-lg ${theme === "dark" ? `#E2C282` : `black`}`}
+            className="text-lg"
             value={email}
           />
 
@@ -242,15 +257,20 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
                 setEditProfile("email");
                 setConfirmModal(true);
               }}
-              color={theme === "dark" ? `white` : `"#001A6E"`}
+              color="#001A6E"
             />
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity className="items-end mt-4">
+        <TouchableOpacity
+          onPress={() => {
+            setConfirmModal(true);
+            setEditProfile("changePassword");
+          }}
+          className="items-end mt-4"
+        >
           <AppText
-            color={theme === "dark" ? `light` : `dark`}
-            className="bg-[#75A90A] text-white/90 p-3 rounded-full"
+            className={`${theme === "dark" ? `text-[#E2C282]` : `text-white`} bg-[#75A90A] p-3 rounded-full`}
           >
             Change Password
           </AppText>
@@ -272,7 +292,7 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
             onOk={handleEditName}
           >
             <AppText
-              color={theme === "dark" ? `light` : `dark`}
+              color="dark"
               className="m-auto text-center font-bold text-lg"
             >
               Do you want to confirm your update on your name?
@@ -293,10 +313,7 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
             onOk={() => setEditProfile("confirmEmail")}
           >
             <View className="mt-8 gap-4 ">
-              <AppText
-                color={theme === "dark" ? `light` : `dark`}
-                className="font-poppins text-lg font-bold"
-              >
+              <AppText color="dark" className="font-poppins text-lg font-bold">
                 Enter credentials to update:
               </AppText>
               <TextInput
@@ -329,16 +346,77 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
             onOk={handleEditEmail}
           >
             {loading ? (
-              <Loading className="h-14 w-14 m-auto pb-4" />
+              <Loading className="h-16 w-16 m-auto pb-4" />
             ) : (
               <AppText
-                color={theme === "dark" ? `light` : `dark`}
+                color="dark"
                 className="m-auto text-center font-bold text-lg"
               >
                 Do you want to confirm your update on your email?
               </AppText>
             )}
           </ConfirmCancelModal>
+        )}
+        {editProfile === "profile" && (
+          <ConfirmCancelModal
+            heightSize={60}
+            blurIntensity={50}
+            padding={12}
+            borderRounded={7}
+            onCancel={() => {
+              setConfirmModal(false);
+              setEditProfile("");
+            }}
+            onClose={() => setConfirmModal(false)}
+            onOk={pickAnImage}
+          >
+            {loading ? (
+              <Loading className="h-16 w-16 m-auto pb-4" />
+            ) : (
+              <AppText
+                color="dark"
+                className="m-auto text-center font-bold text-lg"
+              >
+                Do you want to change your profile picture?
+              </AppText>
+            )}
+          </ConfirmCancelModal>
+        )}
+        {editProfile === "confirmProfilePic" && (
+          <ConfirmCancelModal
+            heightSize={96}
+            blurIntensity={100}
+            padding={12}
+            borderRounded={7}
+            onCancel={() => {
+              setConfirmModal(false);
+              setUri("");
+              setEditProfile("");
+            }}
+            onClose={() => {
+              setConfirmModal(false);
+              setUri("");
+            }}
+            onOk={updateProfile}
+          >
+            {loading ? (
+              <Loading className="h-16 w-16 m-auto pb-4" />
+            ) : (
+              <View className="flex-col items-center justify-center mt-2 gap-5">
+                <Image src={uri} width={102} height={102} borderRadius={50} />
+                <AppText
+                  color="dark"
+                  className="m-auto text-center font-bold text-lg"
+                >
+                  Do you want to use this as your profile picture?
+                </AppText>
+              </View>
+            )}
+          </ConfirmCancelModal>
+        )}
+
+        {editProfile === "changePassword" && (
+          <ChangePassword setConfirmModal={setConfirmModal} />
         )}
       </Modal>
     </BackgroundGradient>

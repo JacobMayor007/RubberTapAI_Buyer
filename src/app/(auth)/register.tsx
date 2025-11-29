@@ -43,7 +43,7 @@ export default function Register() {
 
   const signUp = async () => {
     const regex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]/;
 
     if (!userInfo.fName) {
       Alert.alert("Required field", "Please enter your first name");
@@ -78,7 +78,7 @@ export default function Register() {
     if (!regex.test(userInfo.password)) {
       Alert.alert(
         "Invalid Password",
-        "Your password must have a capital letter, a symbol, and at least 8 characters."
+        "Your password must have a capital letter, a symbol"
       );
       return;
     }
@@ -157,6 +157,8 @@ export default function Register() {
       const result = await response.json();
 
       Alert.alert(result.title, result.message);
+
+      await account.deleteSession({ sessionId: "current" });
 
       router.dismissAll();
       router.replace("/(tabs)");

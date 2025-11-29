@@ -8,7 +8,7 @@ type ConfirmOrCancelModalProps = {
   onOk?: () => void;
   onCancel?: () => void;
   onClose?: () => void;
-  heightSize: 48 | 60 | 72 | 96;
+  heightSize: 48 | 60 | 72 | 96 | 120;
   className?: string;
   borderRounded?: number;
   blurIntensity?:
@@ -103,7 +103,7 @@ export default function ConfirmCancelModal({
             }}
             className="h-8 w-24 bg-blue-500 items-center justify-center rounded-md"
           >
-            <Text className="text-white">Ok</Text>
+            <Text className="text-white">OK</Text>
           </TouchableOpacity>
         </View>
       </View>

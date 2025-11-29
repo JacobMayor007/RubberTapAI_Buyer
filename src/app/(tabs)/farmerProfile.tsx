@@ -12,7 +12,7 @@ import Feather from "@expo/vector-icons/Feather";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import dayjs from "dayjs";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Modal, ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -105,6 +105,7 @@ export default function FarmerProfile() {
               name="arrow-left"
               size={32}
               color={theme === "dark" ? `#E2C282` : `black`}
+              onPress={() => router.back()}
             />
             <AppText
               color={theme === "dark" ? `light` : `dark`}

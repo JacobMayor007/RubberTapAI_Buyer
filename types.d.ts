@@ -68,4 +68,13 @@ type Product = {
   region: string;
 };
 
-export { ChatRoom, MessageHistory, MyNotifications, Product, Profile };
+type AppRate = {
+  $id: string;
+  rating: number;
+  feedback: string;
+  userId: string;
+  $createdAt: string;
+  $updatedAt: string;
+};
+
+export { AppRate, ChatRoom, MessageHistory, MyNotifications, Product, Profile };

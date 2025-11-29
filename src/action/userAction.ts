@@ -267,7 +267,7 @@ const updateProfileAction = async (
       };
 
       const response = await globalFunction.fetchWithTimeout(
-        `${process.env.EXPO_PUBLIC_BASE_URL}/profile`,
+        `http://192.168.1.21:3000/api/v1/users/profile`,
         {
           method: "PATCH",
           headers: {
@@ -310,10 +310,44 @@ const updateReadAllNotif = async (userId: string, API_KEY: string) => {
   }
 };
 
+const rateRubberTapAI = async (
+  userId: string,
+  rating: number,
+  feedback: string,
+  API_KEY: string
+) => {
+  try {
+    const response = await globalFunction.fetchWithTimeout(
+      `${process.env.EXPO_PUBLIC_BASE_URL}/rubbertapai`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          rating,
+          feedback,
+          API_KEY,
+        }),
+      },
+      25000
+    );
+
+    const data = await response.json();
+
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export {
   editEmail,
   editName,
   getMyUnreadNotif,
+  rateRubberTapAI,
   updateMarket,
   updateMessage,
   updateNotif,
