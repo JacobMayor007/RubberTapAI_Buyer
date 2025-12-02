@@ -173,9 +173,23 @@ export default function Register() {
         confirmPassword: "",
       });
       setAgree(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error registering user:", error);
-      Alert.alert("Register Failed", "Failed to create account");
+
+      // Check if it's an Appwrite exception
+      if (error.message && error.message.includes("already exists")) {
+        Alert.alert(
+          "Registration Failed",
+          "This email is already registered. Please use a different email or try logging in."
+        );
+      } else if (error.message && error.message.includes("email")) {
+        Alert.alert("Registration Failed", "Invalid email address.");
+      } else {
+        Alert.alert(
+          "Registration Failed",
+          "Failed to create account. Please try again."
+        );
+      }
     } finally {
       setLoading(false);
     }

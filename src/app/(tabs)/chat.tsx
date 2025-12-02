@@ -1,6 +1,7 @@
 import { AppText } from "@/src/components/AppText";
 import BackgroundGradient from "@/src/components/BackgroundGradient";
 import BottomNav from "@/src/components/BottomNav";
+import Loading from "@/src/components/LoadingComponent";
 import Logo from "@/src/components/Logo";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useMessage } from "@/src/contexts/MessageContext";
@@ -197,7 +198,9 @@ export default function ChatBox() {
           </AppText>
         </View>
         {loading ? (
-          <ActivityIndicator animating size={"large"} />
+          <View className="pt-20">
+            <Loading className="h-16 w-16 mx-auto " />
+          </View>
         ) : (
           <ScrollView className="flex-1 pb-36 gap-2">
             {chatHistory.map((chat, chatIndex) => {

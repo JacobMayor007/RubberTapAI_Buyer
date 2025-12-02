@@ -33,6 +33,7 @@ type Profile = {
   weatherAlert: boolean;
   messageAlert: boolean;
   marketAlert: boolean;
+  rate: number;
 } | null;
 
 type AuthContextType = {

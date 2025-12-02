@@ -1,6 +1,7 @@
 import { updateReadAllNotif } from "@/src/action/userAction";
 import { AppText } from "@/src/components/AppText";
 import BackgroundGradient from "@/src/components/BackgroundGradient";
+import Loading from "@/src/components/LoadingComponent";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useMessage } from "@/src/contexts/MessageContext";
 import { useTheme } from "@/src/contexts/ThemeContext";
@@ -17,7 +18,7 @@ export default function AllMyNotifications() {
   const { profile } = useAuth();
   const [myNotifications, setMyNotifications] = useState<MyNotifications[]>([]);
   const [unread, setUnread] = useState(0);
-
+  const [loading, setLoading] = useState(false);
   const { setUser } = useMessage();
   const { theme } = useTheme();
   const router = useRouter();
@@ -30,6 +31,7 @@ export default function AllMyNotifications() {
 
   const getMyNotifs = async () => {
     try {
+      setLoading(true);
       const response = await globalFunction.fetchWithTimeout(
         `${process.env.EXPO_PUBLIC_BASE_URL}/notifications`,
         {
@@ -66,6 +68,8 @@ export default function AllMyNotifications() {
       setUnread(unreadCount);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -105,6 +109,16 @@ export default function AllMyNotifications() {
       getMyNotifs();
     }
   };
+
+  if (loading) {
+    return (
+      <BackgroundGradient
+        className={` flex-1 flex-row items-center justify-center`}
+      >
+        <Loading className="h-16 w-16 mx-auto" />
+      </BackgroundGradient>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1">

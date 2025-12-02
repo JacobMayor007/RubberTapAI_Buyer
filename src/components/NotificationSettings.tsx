@@ -6,6 +6,7 @@ import { updateMarket, updateMessage, updateNotif } from "../action/userAction";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { AppText } from "./AppText";
+import BackgroundGradient from "./BackgroundGradient";
 import Loading from "./LoadingComponent";
 
 type NotificationProps = {
@@ -69,73 +70,73 @@ const NotificationSettings = ({ setVisibleModal }: NotificationProps) => {
   }
 
   return (
-    <SafeAreaView
-      className={`flex-1 ${theme === "dark" ? `bg-gray-900` : `bg-[#FFECCC]`} p-6 gap-2`}
-    >
-      <FontAwesome5
-        name="arrow-left"
-        size={20}
-        onPress={() => setVisibleModal(false)}
-        color={theme === "dark" ? `white` : `black`}
-      />
-      <AppText
-        color={theme === "dark" ? `light` : `dark`}
-        className="font-poppins font-bold text-xl mt-5"
-      >
-        Notification Settings
-      </AppText>
-      <View className="flex-row justify-between items-center border-b-[0.5px] border-[#046A10] pb-2">
+    <SafeAreaView className={`flex-1  `}>
+      <BackgroundGradient className="flex-1 p-6 gap-2">
+        <FontAwesome5
+          name="arrow-left"
+          size={20}
+          onPress={() => setVisibleModal(false)}
+          color={theme === "dark" ? `white` : `black`}
+        />
         <AppText
           color={theme === "dark" ? `light` : `dark`}
-          className="font-poppins text-lg"
+          className="font-poppins font-bold text-xl mt-5"
         >
-          Enable notifications
+          Notification Settings
         </AppText>
-        <Switch
-          trackColor={{ false: "#767577", true: "#009A1C" }}
-          thumbColor={profile?.notif ? "white" : "#f4f3f4"}
-          onValueChange={() => {
-            toggleSwitch("notif");
-          }}
-          value={profile?.notif}
-        />
-      </View>
-      <View className="flex-col justify-between items-center border-b-[0.5px] border-[#046A10] pb-4">
-        <View className="flex-row justify-between items-center w-full">
+        <View className="flex-row justify-between items-center border-b-[0.5px] border-[#046A10] pb-2">
           <AppText
             color={theme === "dark" ? `light` : `dark`}
-            className="font-poppins text-lg font-medium"
+            className="font-poppins text-lg"
           >
-            Rubber market price
+            Enable notifications
           </AppText>
           <Switch
-            disabled={profile?.notif ? false : true}
             trackColor={{ false: "#767577", true: "#009A1C" }}
-            thumbColor={profile?.marketAlert ? "white" : "#f4f3f4"}
+            thumbColor={profile?.notif ? "white" : "#f4f3f4"}
             onValueChange={() => {
-              toggleSwitch("market");
+              toggleSwitch("notif");
             }}
-            value={profile?.marketAlert}
+            value={profile?.notif}
           />
         </View>
-        <View className="flex-row justify-between items-center  w-full">
-          <AppText
-            color={theme === "dark" ? `light` : `dark`}
-            className="font-poppins text-lg font-medium"
-          >
-            Message alerts
-          </AppText>
-          <Switch
-            disabled={profile?.notif ? false : true}
-            trackColor={{ false: "#767577", true: "#009A1C" }}
-            thumbColor={profile?.messageAlert ? "white" : "#f4f3f4"}
-            onValueChange={() => {
-              toggleSwitch("message");
-            }}
-            value={profile?.messageAlert}
-          />
+        <View className="flex-col justify-between items-center border-b-[0.5px] border-[#046A10] pb-4">
+          <View className="flex-row justify-between items-center w-full">
+            <AppText
+              color={theme === "dark" ? `light` : `dark`}
+              className="font-poppins text-lg font-medium"
+            >
+              Rubber market price
+            </AppText>
+            <Switch
+              disabled={profile?.notif ? false : true}
+              trackColor={{ false: "#767577", true: "#009A1C" }}
+              thumbColor={profile?.marketAlert ? "white" : "#f4f3f4"}
+              onValueChange={() => {
+                toggleSwitch("market");
+              }}
+              value={profile?.marketAlert}
+            />
+          </View>
+          <View className="flex-row justify-between items-center  w-full">
+            <AppText
+              color={theme === "dark" ? `light` : `dark`}
+              className="font-poppins text-lg font-medium"
+            >
+              Message alerts
+            </AppText>
+            <Switch
+              disabled={profile?.notif ? false : true}
+              trackColor={{ false: "#767577", true: "#009A1C" }}
+              thumbColor={profile?.messageAlert ? "white" : "#f4f3f4"}
+              onValueChange={() => {
+                toggleSwitch("message");
+              }}
+              value={profile?.messageAlert}
+            />
+          </View>
         </View>
-      </View>
+      </BackgroundGradient>
     </SafeAreaView>
   );
 };
