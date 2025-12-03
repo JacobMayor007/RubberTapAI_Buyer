@@ -19,6 +19,7 @@ import { account } from "../lib/appwrite";
 import { AppText } from "./AppText";
 import BackgroundGradient from "./BackgroundGradient";
 
+import AntDesign from "@expo/vector-icons/AntDesign";
 import ChangePassword from "./ChangePassword";
 import ConfirmCancelModal from "./ConfirmOrCancelModal";
 import Loading from "./LoadingComponent";
@@ -39,6 +40,7 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
   const [loading, setLoading] = useState(false);
   const [uri, setUri] = useState("");
   const { theme } = useTheme();
+  const [userVerification, setUserVerification] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -159,6 +161,47 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
     }
   };
 
+  const isUserVerified = () => {
+    if (!user?.emailVerification) {
+      if (userVerification) {
+        Alert.alert("Already been sent to your email, please check!");
+        return;
+      }
+
+      Alert.alert(
+        "Account Verification",
+        "Do you want to verify your account?",
+        [
+          {
+            text: "Not Now",
+            onPress: () => console.log("Cancel"),
+            style: "cancel",
+          },
+          {
+            text: "Ok",
+            onPress: async () => {
+              try {
+                setUserVerification(true);
+
+                const result = await account.createVerification({
+                  url: "https://rubbertapai.netlify.app/",
+                });
+                console.log("Verification email sent:", result);
+
+                Alert.alert(
+                  "Verification email sent",
+                  "Please check your email"
+                );
+              } catch (error) {
+                console.error("Failed to send verification:", error);
+              }
+            },
+          },
+        ]
+      );
+    }
+  };
+
   return (
     <BackgroundGradient className="flex-1 ">
       <View className="flex-row items-center gap-7 m-6">
@@ -173,23 +216,40 @@ export default function EditProfile({ setVisibleModal }: AppearanceProps) {
       </View>
 
       <View className="m-6">
-        <View className="flex-row items-end ">
-          <Image
-            src={uri ? uri : profile?.imageURL}
-            fadeDuration={300}
-            className="h-16 w-16 rounded-full bg-[#fee0ac]"
-          />
-          <TouchableOpacity>
-            <MaterialIcons
-              name="edit"
-              size={20}
-              onPress={() => {
-                setEditProfile("profile");
-                setConfirmModal(true);
-              }}
-              color="#001A6E"
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-end ">
+            <Image
+              src={uri ? uri : profile?.imageURL}
+              fadeDuration={300}
+              className="h-16 w-16 rounded-full bg-[#fee0ac]"
             />
-          </TouchableOpacity>
+            <TouchableOpacity>
+              <MaterialIcons
+                name="edit"
+                size={20}
+                onPress={() => {
+                  setEditProfile("profile");
+                  setConfirmModal(true);
+                }}
+                color={theme === "dark" ? `#E2C282` : `"#001A6E"`}
+              />
+            </TouchableOpacity>
+          </View>
+          {!user?.emailVerification ? (
+            <TouchableOpacity
+              onPress={isUserVerified}
+              className={`bg-red-500 flex-row gap-2 items-center px-4 py-2 rounded-full `}
+            >
+              <AppText className="text-white">Verify email</AppText>
+            </TouchableOpacity>
+          ) : (
+            <View
+              className={` bg-[#75A90A] flex-row gap-2 items-center px-4 py-2 rounded-full `}
+            >
+              <AppText className="text-white">Verified </AppText>
+              <AntDesign name="check" color={"white"} />
+            </View>
+          )}
         </View>
         <AppText color="dark" className="font-poppins font-bold text-lg mt-4">
           Name:

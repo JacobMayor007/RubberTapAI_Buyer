@@ -79,16 +79,16 @@ export default function FarmerProfile() {
     setProducts((prev) => {
       let sorted = [...prev];
       switch (active) {
-        case 0: // Recently Added
+        case 0: 
           sorted.sort(
             (a, b) =>
               dayjs(b.$createdAt).valueOf() - dayjs(a.$createdAt).valueOf()
           );
           break;
-        case 1: // Price: High to Low
+        case 1: 
           sorted.sort((a, b) => b.price - a.price);
           break;
-        case 2: // Price: Low to High
+        case 2: 
           sorted.sort((a, b) => a.price - b.price);
           break;
       }

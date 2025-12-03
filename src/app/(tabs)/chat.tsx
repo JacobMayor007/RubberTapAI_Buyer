@@ -38,18 +38,6 @@ export default function ChatBox() {
   const { theme } = useTheme();
 
   useEffect(() => {
-    handleFirstLoad();
-  }, []);
-
-  const handleFirstLoad = async () => {
-    try {
-      await getChat(user?.$id || "");
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  useEffect(() => {
     const fetchProfile = async () => {
       try {
         const response = await fetch(
@@ -71,29 +59,33 @@ export default function ChatBox() {
     fetchProfile();
   }, [user?.$id]);
 
-  const getChat = async (user_id: string) => {
-    try {
-      setLoading(true);
+  useEffect(() => {
+    const getChat = async () => {
+      try {
+        setLoading(true);
 
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_BASE_URL}/chat-room/${user_id}`,
-        {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-          },
-        }
-      );
+        const response = await fetch(
+          `${process.env.EXPO_PUBLIC_BASE_URL}/chat-room/${user?.$id}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        );
 
-      const data = await response.json();
+        const data = await response.json();
 
-      setChatHistory(data);
-    } catch (error) {
-      console.error("Upload error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setChatHistory(data);
+      } catch (error) {
+        console.error("Upload error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getChat();
+  }, [user?.$id]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
