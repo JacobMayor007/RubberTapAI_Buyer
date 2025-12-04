@@ -162,6 +162,8 @@ export default function Messages() {
 
       console.log("Data to be sent: ", JSON.stringify(data, null, 2));
 
+      //
+
       await fetch(`${process.env.EXPO_PUBLIC_BASE_URL}/sent-message`, {
         method: "POST",
         headers: {

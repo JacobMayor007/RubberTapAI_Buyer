@@ -12,7 +12,6 @@ import NotificationSettings from "@/src/components/NotificationSettings";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useTheme } from "@/src/contexts/ThemeContext";
 import { globalFunction } from "@/src/global/fetchWithTimeout";
-import { account } from "@/src/lib/appwrite";
 import { AppRate } from "@/types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -38,7 +37,6 @@ export default function Menu() {
   const [rate, setRate] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [userRated, setUserRated] = useState<AppRate | null>(null);
-  const [userVerification, setUserVerification] = useState(false);
 
   useEffect(() => {
     const isUserRate = async () => {
@@ -126,46 +124,7 @@ export default function Menu() {
     }
   };
 
-  const isUserVerified = () => {
-    if (!user?.emailVerification) {
-      if (userVerification) {
-        Alert.alert("Already been sent to your email, please check!");
-        return;
-      }
-
-      Alert.alert(
-        "Account Verification",
-        "Do you want to verify your account?",
-        [
-          {
-            text: "Not Now",
-            onPress: () => console.log("Cancel"),
-            style: "cancel",
-          },
-          {
-            text: "Ok",
-            onPress: async () => {
-              try {
-                setUserVerification(true);
-
-                const result = await account.createVerification({
-                  url: "https://rubbertapai.netlify.app/",
-                });
-                console.log("Verification email sent:", result);
-
-                Alert.alert(
-                  "Verification email sent",
-                  "Please check your email"
-                );
-              } catch (error) {
-                console.error("Failed to send verification:", error);
-              }
-            },
-          },
-        ]
-      );
-    }
-  };
+ 
 
   return (
     <SafeAreaView className="flex-1">

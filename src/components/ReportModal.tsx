@@ -10,6 +10,7 @@ import { reportUserFetch } from "../action/reportAction";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { AppText } from "./AppText";
+import BackgroundGradient from "./BackgroundGradient";
 import ConfirmCancelModal from "./ConfirmOrCancelModal";
 
 type ReportModalProp = {
@@ -140,9 +141,9 @@ export default function ReportModal({
   };
 
   return (
-    <View className="flex-1 bg-[#FFECCC] justify-between">
+    <BackgroundGradient className="flex-1  justify-between">
       <View className="">
-        <View className="h-[40%] bg-[#EFDEC1] p-6 relative ">
+        <View className="h-[40%]  p-6 relative ">
           <FontAwesome5
             name="arrow-left"
             size={20}
@@ -153,7 +154,7 @@ export default function ReportModal({
           />
           <Image
             source={require("@/assets/images/report.png")}
-            className="h-[90%] w-[74%] m-auto"
+            className="h-[80%] w-[100%] m-auto"
           />
         </View>
         <View className="p-6">
@@ -202,7 +203,7 @@ export default function ReportModal({
             <FontAwesome5 name="upload" size={40} color="#8F8F8F" />
             <AppText
               color="light"
-              className="bg-[#F09D58] font-poppins text-xl px-4 py-2 rounded-full"
+              className="bg-[#F09D58] font-poppins text-white text-xl px-4 py-2 rounded-full"
             >
               Browse Files
             </AppText>
@@ -222,12 +223,14 @@ export default function ReportModal({
         </View>
       </View>
       <TouchableOpacity
-        className={`${theme === "dark" ? `bg-gray-900` : `bg-[#75A90A]`} m-5 h-12 justify-self-end rounded-lg items-center justify-center`}
+        className={`bg-[#75A90A]  m-5 h-12 justify-self-end rounded-lg items-center justify-center`}
         onPress={() => {
           setConfirmModal(true);
         }}
       >
-        <AppText className="text-lg font-bold">Submit Report</AppText>
+        <AppText className="text-lg font-bold text-white">
+          Submit Report
+        </AppText>
       </TouchableOpacity>
       <Modal
         visible={confirmModal}
@@ -257,6 +260,6 @@ export default function ReportModal({
           </AppText>
         </ConfirmCancelModal>
       </Modal>
-    </View>
+    </BackgroundGradient>
   );
 }

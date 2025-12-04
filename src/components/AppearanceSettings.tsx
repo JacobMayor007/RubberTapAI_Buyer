@@ -2,9 +2,10 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Fontisto from "@expo/vector-icons/Fontisto";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
-import { Pressable, SafeAreaView, useColorScheme } from "react-native";
+import { Pressable, useColorScheme } from "react-native";
 import { useTheme } from "../contexts/ThemeContext";
 import { AppText } from "./AppText";
+import BackgroundGradient from "./BackgroundGradient";
 
 type AppearanceProps = {
   setVisibleModal: (visible: boolean) => void;
@@ -63,9 +64,7 @@ const AppearanceSettings = ({ setVisibleModal }: AppearanceProps) => {
   console.log("setTheme: ", themeType);
 
   return (
-    <SafeAreaView
-      className={`flex-1 ${theme === "dark" ? `bg-gray-900` : `bg-[#FFECCC]`} p-6 gap-2`}
-    >
+    <BackgroundGradient className={`flex-1 flex-cold p-6 gap-2`}>
       <FontAwesome5
         name="arrow-left"
         size={20}
@@ -83,7 +82,7 @@ const AppearanceSettings = ({ setVisibleModal }: AppearanceProps) => {
           <Pressable
             onPress={() => handleThemeChange(data.title, data.label)}
             key={data?.key}
-            className="flex-row items-center gap-4"
+            className="flex-row items-center gap-4 my-3"
           >
             {themeType === data?.label ? (
               <Fontisto name="radio-btn-active" color={"#009A1C"} size={22} />
@@ -94,7 +93,10 @@ const AppearanceSettings = ({ setVisibleModal }: AppearanceProps) => {
                 size={22}
               />
             )}
-            <AppText color={theme === "dark" ? "light" : "dark"}>
+            <AppText
+              color={theme === "dark" ? "light" : "dark"}
+              className="text-lg"
+            >
               {data?.label}
             </AppText>
           </Pressable>
@@ -104,7 +106,7 @@ const AppearanceSettings = ({ setVisibleModal }: AppearanceProps) => {
         If system is selected, RubberTapAI will automatically adjust your
         appearance on your device{"'"}s system settings.
       </AppText>
-    </SafeAreaView>
+    </BackgroundGradient>
   );
 };
 

@@ -1,10 +1,11 @@
 import { AppText } from "@/src/components/AppText";
+import BackgroundGradient from "@/src/components/BackgroundGradient";
 import ReportModal from "@/src/components/ReportModal";
 import { useTheme } from "@/src/contexts/ThemeContext";
 import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { Modal, TouchableOpacity, View } from "react-native";
+import { Modal, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Report() {
@@ -52,7 +53,7 @@ export default function Report() {
 
   return (
     <SafeAreaView className="flex-1">
-      <View className={`flex-1 bg-[#FFECCC] p-6`}>
+      <BackgroundGradient className={`flex-1  p-6`}>
         <Feather name="x" size={28} onPress={() => router.back()} />
         <AppText
           className="font-poppins font-bold text-xl mt-4"
@@ -76,7 +77,7 @@ export default function Report() {
                 setDescription(data?.description);
               }}
               key={data?.key}
-              className="flex-col mb-4"
+              className="flex-col my-3"
             >
               <AppText
                 color={theme === "dark" ? `light` : `dark`}
@@ -87,7 +88,7 @@ export default function Report() {
             </TouchableOpacity>
           );
         })}
-      </View>
+      </BackgroundGradient>
       <Modal
         visible={modal}
         onRequestClose={() => setModal(false)}
